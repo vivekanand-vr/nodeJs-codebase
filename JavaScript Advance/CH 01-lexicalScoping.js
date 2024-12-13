@@ -1,5 +1,7 @@
 /*
- * Lexical Scoping and Auto-globals
+ * Lexical Scoping and Auto-globals:
+ * - JavaScript uses lexical scoping, meaning a variable's scope is determined at the time of declaration.
+ * - Inner functions can access variables from their outer (parent) functions, forming a closure.
  */
 
 // 1. Lexical Scoping Basics
