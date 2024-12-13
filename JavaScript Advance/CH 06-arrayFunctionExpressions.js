@@ -3,7 +3,7 @@
  * - JavaScript provides various array methods for functional programming, like `map`, `filter`, `reduce`, etc.
  * - These methods help process and manipulate arrays efficiently.
  * - Common array functions include:
- *     - map(): Transforms each element and returns a new array.
+ *     - map()    : Transforms each element and returns a new array.
  *     - filter() : Filters elements based on a condition.
  *     - forEach(): Executes a function for each element (no return).
  *     - reduce() : Reduces the array to a single value.
@@ -12,10 +12,66 @@
  *     - every()  : Checks if all elements satisfy a condition.
  */
 
-// 1. map() - Transform each element in an array
 const numbers = [1, 2, 3, 4, 5];
-const squared = numbers.map((num) => num * num);
-console.log(squared); // Output: [1, 4, 9, 16, 25]
+
+// 1. map() - Transform each element in an array
+/*
+ * Example 1: Basic Custom Map Function
+ */
+function customMap(array, callback) {
+    const result = [];
+    for (let i = 0; i < array.length; i++) {
+        result.push(callback(array[i], i, array)); // Apply the callback
+    }
+    return result;
+}
+
+// Using the customMap function
+const doubled = customMap(numbers, (num) => num * 2);
+console.log(doubled); // Output: [2, 4, 6, 8, 10]
+
+/*
+ * Example 2: Custom Map Function with Context (thisArg)
+ */
+function customMapWithContext(array, callback, thisArg) {
+    const result = [];
+    for (let i = 0; i < array.length; i++) {
+        result.push(callback.call(thisArg, array[i], i, array)); // Use `thisArg` as context
+    }
+    return result;
+}
+
+// Using the customMapWithContext function
+const multiplier = {
+    factor: 3,
+};
+const tripled = customMapWithContext(numbers, function (num) {
+    return num * this.factor;
+}, multiplier);
+console.log(tripled); // Output: [3, 6, 9, 12, 15]
+
+/*
+ * Example 3: Custom Async Map Function (Handles Promises)
+ */
+async function customAsyncMap(array, asyncCallback) {
+    const result = [];
+    for (let i = 0; i < array.length; i++) {
+        result.push(await asyncCallback(array[i], i, array)); // Await each callback result
+    }
+    return result;
+}
+
+// Using the customAsyncMap function
+const asyncDoubled = async () => {
+    const asyncNumbers = await customAsyncMap(numbers, async (num) => {
+        return new Promise((resolve) => {
+            setTimeout(() => resolve(num * 2), 100); // Simulate async processing
+        });
+    });
+    console.log(asyncNumbers); // Output: [2, 4, 6, 8, 10]
+};
+asyncDoubled();
+
 
 
 // 2. filter() - Filter elements based on a condition
