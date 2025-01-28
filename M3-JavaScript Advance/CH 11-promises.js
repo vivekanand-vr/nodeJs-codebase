@@ -80,3 +80,52 @@ simulateApiCall()
 // API call succeeded!
 // OR
 // API call failed.
+
+/*
+ * Promise Methods:
+ * These methods are built-in utilities for working with multiple promises.
+ */
+
+/*
+ * Promise.resolve():
+ * Returns a promise that is resolved with a given value.
+ */
+Promise.resolve("Resolved immediately!")
+    .then((value) => console.log(value));
+// Output: Resolved immediately!
+
+/*
+ * Promise.reject():
+ * Returns a promise that is rejected with a given reason.
+ */
+Promise.reject("Immediate rejection!")
+    .catch((reason) => console.error(reason));
+// Output: Immediate rejection!
+
+/*
+ * Promise.allSettled():
+ * Waits for all promises to settle (either fulfilled or rejected) and returns their results.
+ */
+Promise.allSettled([promise1, Promise.reject("Error in promise"), promise2])
+    .then((results) => console.log("Settled results:", results));
+// Output: Settled results: [{status: "fulfilled", value: "Data from API 1"}, ...]
+
+/*
+ * Promise.race():
+ * Resolves or rejects as soon as one of the promises settles.
+ */
+Promise.race([
+    new Promise((resolve) => setTimeout(() => resolve("First resolved!"), 500)),
+    new Promise((resolve) => setTimeout(() => resolve("Second resolved!"), 1000))
+])
+    .then((result) => console.log(result));
+// Output: First resolved!
+
+/*
+ * Promise.any():
+ * Resolves as soon as any promise fulfills (ignores rejections).
+ */
+Promise.any([Promise.reject("Error 1"), promise2, Promise.reject("Error 2")])
+    .then((value) => console.log("First fulfilled value:", value))
+    .catch((error) => console.error("No promises fulfilled:", error));
+// Output: First fulfilled value: Data from API 2
