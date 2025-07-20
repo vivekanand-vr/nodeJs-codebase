@@ -3,6 +3,9 @@
  * - `setTimeout`: Executes a function after a specified delay (in milliseconds).
  * - `setInterval`: Repeatedly executes a function at a specified interval (in milliseconds).
  * - Both functions return a unique identifier (ID) that can be used with `clearTimeout` or `clearInterval` to stop the execution.
+ * - JS is single-threaded but uses browser/Web APIs to handle async tasks.
+ * - setTimeout/Interval are handled outside the main thread.
+ * - After delay, callbacks are queued and picked when call stack is empty.
  */
 
 /*
@@ -86,3 +89,76 @@ const repeatAction = setInterval(() => {
         console.log("Action repetitions stopped");
     }
 }, 1000); // Repeats every second
+
+
+/**
+ * Example: Multiple Functions with setTimeout and Native Methods
+ * Goal: Understand how timers execute asynchronously and how native synchronous methods work in parallel.
+ */
+
+console.log("Script Start");
+
+// Function 1: Uses map (synchronous) + setTimeout (1000ms)
+function processNumbers() {
+  const nums = [1, 2, 3];
+  const squared = nums.map((n) => n * n);
+  console.log("Squared Numbers:", squared);
+
+  setTimeout(() => {
+    console.log("Processed Numbers after 1 second:", squared);
+  }, 1000);
+}
+
+// Function 2: Uses filter (synchronous) + setTimeout (500ms)
+function filterWords() {
+  const words = ["apple", "banana", "kiwi", "avocado"];
+  const filtered = words.filter((w) => w.startsWith("a"));
+  console.log("Filtered Words:", filtered);
+
+  setTimeout(() => {
+    console.log("Filtered Words after 0.5 second:", filtered);
+  }, 500);
+}
+
+// Function 3: Uses Object.values + setTimeout (200ms)
+function showUserInfo() {
+  const user = {
+    name: "John",
+    age: 30,
+    country: "India",
+  };
+
+  const values = Object.values(user);
+  console.log("User Info:", values);
+
+  setTimeout(() => {
+    console.log("User Info after 0.2 second:", values);
+  }, 200);
+}
+
+// Call all functions
+processNumbers();
+filterWords();
+showUserInfo();
+
+console.log("Script End");
+
+
+/**
+ * 
+ * Expected Output: 
+ * ----------------
+    Script Start
+    Squared Numbers: [ 1, 4, 9 ]
+    Filtered Words: [ 'apple', 'avocado' ]
+    User Info: [ 'John', 30, 'India' ]
+    Script End
+    User Info after 0.2 second: [ 'John', 30, 'India' ]
+    Filtered Words after 0.5 second: [ 'apple', 'avocado' ]
+    Processed Numbers after 1 second: [ 1, 4, 9 ]
+
+ * JS first runs all synchronous code top to bottom.
+ * Each setTimeout schedules its callback with the Web API.
+ * Once delay is over and the call stack is clear, the callback is queued.
+ * The event loop pushes queued callbacks back into the call stack one-by-one.
+ */

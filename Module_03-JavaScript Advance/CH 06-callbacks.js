@@ -3,6 +3,10 @@
  * - A callback is a function passed into another function as an argument to be executed later.
  * - Callbacks are often used for handling asynchronous operations, such as handling events, or waiting for a process to complete.
  * - Common use cases include setTimeout, setInterval, array methods like map, filter, etc.
+ * 
+ *  Problems With Callbacks: 
+ *  -> Inversion of control
+ *  -> Callback Hell
  */
 
 /*

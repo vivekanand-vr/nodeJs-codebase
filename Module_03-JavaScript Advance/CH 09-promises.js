@@ -1,8 +1,23 @@
 /*
  * Promises in JavaScript:
  * - Promises are objects that represent the eventual completion (or failure) of an asynchronous operation.
- * - They simplify writing asynchronous code, avoiding "callback hell."
- * - Promises have three states: pending, fulfilled, and rejected.
+ * - They simplify writing asynchronous code, avoiding "callback hell" and resolves problem of IOC. 
+ * - Promises have three states: pending, fulfilled, and rejected. They are returned immediately after calling. 
+ * - Promise will act as a placeholder for the data we hope to get back sometime in future.
+ * - Promise cretion is synchronous in nature as it's native to js.
+ * - Once the future task done is the promises will automatically execute the attached functionality.
+ * - With whatever argument we pass in the 'resolve'/'reject' function during promise creation will be assigned as
+ *   value of that promise.
+ * - Promise will stay in pending state if not called 'reject'/'resolve'
+ * 
+ *  Common Use Cases of Promises:
+ *  -----------------------------
+ *  -> Fetching Data from APIs
+ *  -> Reading Files Asynchronously
+ *  -> Executing Multiple Asynchronous Operations Concurrently
+ *  -> Chaining Dependent Asynchronous Operations
+ *  -> Handling Animations or Timed Events
+ *  -> Loading External Scripts or Resources
  */
 
 /*
@@ -129,3 +144,69 @@ Promise.any([Promise.reject("Error 1"), promise2, Promise.reject("Error 2")])
     .then((value) => console.log("First fulfilled value:", value))
     .catch((error) => console.error("No promises fulfilled:", error));
 // Output: First fulfilled value: Data from API 2
+
+
+/**
+ * Consuming Promises using then(resolveHandler, rejectionHandler)
+ * 
+ * In JavaScript, Promises are used to handle asynchronous operations.
+ * The `.then()` method takes two optional arguments:
+ *    - resolveHandler → called when the promise is fulfilled
+ *    - rejectionHandler → called when the promise is rejected
+ *
+ * Syntax:
+ *    promise.then(onFulfilled, onRejected)
+ *
+ * Note:
+ * - You can use one or both arguments.
+ * - It’s better practice to use `.catch()` for error handling, 
+ *   but this example shows direct use of both handlers inside `.then()`.
+ */
+
+// Simulated asynchronous operation using a Promise
+const fetchData = (shouldSucceed) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (shouldSucceed) {
+                resolve("Data fetched successfully!");
+            } else {
+                reject("Failed to fetch data.");
+            }
+        }, 1000); // Simulates delay
+    });
+};
+
+// Define the resolve handler
+function handleSuccess(data) {
+    console.log("Resolved:", data);
+}
+
+// Define the rejection handler
+function handleError(error) {
+    console.log("Rejected:", error);
+}
+
+// Use the Promise with .then(resolveHandler, rejectionHandler)
+console.log("Calling fetchData...");
+
+fetchData(true).then(handleSuccess, handleError); // Change to false to test rejection
+
+console.log("This line runs before the Promise resolves.");
+
+/**
+ * 🔍 Behind the scenes:
+ * - fetchData(true) returns a pending Promise
+ * - setTimeout schedules resolution after 1 second
+ * - handleSuccess is called after 1 second
+ * - JavaScript continues executing the next lines immediately
+ *
+ * 🧾 Expected Output (when shouldSucceed = true):
+ * Calling fetchData...
+ * This line runs before the Promise resolves.
+ * Resolved: Data fetched successfully!
+ *
+ * 🧾 If shouldSucceed = false:
+ * Calling fetchData...
+ * This line runs before the Promise resolves.
+ * Rejected: Failed to fetch data.
+ */

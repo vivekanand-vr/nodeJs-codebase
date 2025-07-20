@@ -3,6 +3,8 @@
  * - Async functions return a promise and make asynchronous code easier to read and write.
  * - `await` pauses the execution until the promise resolves or rejects.
  * - Always use `try...catch` for error handling.
+ * - Await keyword should be always used in a async function
+ * - If no await keyword is used inside async function it will run synchronously
  */
 
 /*

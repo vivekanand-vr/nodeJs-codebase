@@ -80,16 +80,47 @@ funcsVar[0](); // Value of i: 0
 funcsVar[1](); // Value of i: 1
 funcsVar[2](); // Value of i: 2
 
-/*
+/**
  * Example 5: Real-World Use Case of Closures (Debounce)
+ *
+ * 🔍 What is Debounce?
+ * ---------------------
+ * Debouncing is a programming pattern used to control how often a function is executed.
+ * It ensures that the function is **only called once after a certain amount of time has passed**
+ * since the **last time** it was invoked.
+ *
+ * Commonly used for:
+ * - Handling input events (search bars, typeahead)
+ * - Window resize or scroll events
+ * - Preventing frequent API calls or updates
+ *
+ * 👨‍🏫 How it works:
+ * ------------------
+ * - When the debounced function is called, it sets a timer (setTimeout).
+ * - If it's called again **before the delay ends**, the previous timer is cleared using clearTimeout.
+ * - Only when there's a pause of `delay` milliseconds without new calls, the original callback executes.
+ *
+ * 🧠 Why does it work?
+ * ---------------------
+ * - JavaScript closures allow the inner function to **remember** and **access** `timeoutId` even after `debounce()` has returned.
+ * - This `timeoutId` is retained across calls to cancel the previous timer and schedule a new one.
+ *
+ * ✅ Benefits:
+ * - Reduces unnecessary executions
+ * - Optimizes performance (especially in DOM-heavy or network-heavy applications)
+ *
+ * 📦 Real-world analogy:
+ * - Think of pressing a button multiple times, but the action only occurs if you stop pressing it for a moment.
  */
+
 function debounce(callback, delay) {
     let timeoutId;
     return function (...args) {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => callback(...args), delay);
+        clearTimeout(timeoutId); // Cancel previous timer if still waiting
+        timeoutId = setTimeout(() => callback(...args), delay); // Set new delay
     };
 }
+
 
 const debouncedLog = debounce((message) => console.log(message), 2000);
 debouncedLog("First call"); // Only this call will be logged after 2 seconds if no further calls occur
