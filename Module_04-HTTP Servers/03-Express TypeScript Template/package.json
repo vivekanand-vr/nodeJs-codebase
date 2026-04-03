@@ -1,9 +1,12 @@
 {
   "name": "03-express-typescript-template",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Production-ready Express.js TypeScript backend template with logging, validation, correlation IDs, and structured error handling.",
+  "main": "dist/server.js",
   "scripts": {
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

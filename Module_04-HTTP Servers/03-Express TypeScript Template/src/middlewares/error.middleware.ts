@@ -6,6 +6,7 @@
 
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/errors/app.error";
+import logger from "../config/logger.config";
 
 /**
  * Handles known application-specific errors.
@@ -17,7 +18,7 @@ import { AppError } from "../utils/errors/app.error";
  * @param next - Express NextFunction for middleware chaining
  */
 export const appErrorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
-  console.log(err);
+  logger.error(`[AppError] ${err.statusCode} - ${err.message}`, { name: err.name, stack: err.stack });
 
   res.status(err.statusCode).json({
     success: false,
@@ -35,7 +36,7 @@ export const appErrorHandler = (err: AppError, req: Request, res: Response, next
  * @param next - Express NextFunction for middleware chaining
  */
 export const genericErrorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.log(err);
+  logger.error(`[UnhandledError] ${err.message}`, { name: err.name, stack: err.stack });
 
   res.status(500).json({
     success: false,

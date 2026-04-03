@@ -149,3 +149,43 @@ export class NotImplementedError implements AppError {
     this.name = "NotImplementedError";
   }
 }
+
+/**
+ * Represents an Unprocessable Entity error (HTTP 422).
+ * Used when the request is well-formed but contains semantic errors
+ * (e.g. business rule violations after passing schema validation).
+ *
+ * @class UnprocessableEntityError
+ * @implements {AppError}
+ */
+export class UnprocessableEntityError implements AppError {
+  statusCode: number;
+  message: string;
+  name: string;
+
+  constructor(message: string) {
+    this.statusCode = 422;
+    this.message = message;
+    this.name = "UnprocessableEntityError";
+  }
+}
+
+/**
+ * Represents a Too Many Requests error (HTTP 429).
+ * Used when a client has sent too many requests in a given time window
+ * (rate limiting). Consumers should honour the Retry-After header.
+ *
+ * @class TooManyRequestsError
+ * @implements {AppError}
+ */
+export class TooManyRequestsError implements AppError {
+  statusCode: number;
+  message: string;
+  name: string;
+
+  constructor(message: string = "Too many requests, please try again later.") {
+    this.statusCode = 429;
+    this.message = message;
+    this.name = "TooManyRequestsError";
+  }
+}
