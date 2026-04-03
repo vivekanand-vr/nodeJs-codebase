@@ -1,7 +1,52 @@
 /*
- * Closures in JavaScript:
- * - A closure is a function that "remembers" the variables from its lexical scope even after the outer function has finished execution.
- * - Closures are created every time a function is defined inside another function and references variables from the outer function.
+ * ============================================================
+ *  CLOSURES
+ * ============================================================
+ *
+ * DEFINITION:
+ *   A closure is a function that retains a live reference to the variables
+ *   of its lexical scope even after the outer function has returned.
+ *   Every function in JavaScript forms a closure over its enclosing scope
+ *   at the moment it is CREATED (written), not when it is called.
+ *
+ * HOW IT WORKS:
+ *   When a function is defined inside another function, JS attaches a hidden
+ *   [[Environment]] slot to the inner function pointing at the outer
+ *   function's variable environment.  When the outer returns, that
+ *   environment is NOT garbage-collected as long as the inner function
+ *   (the closure) is still reachable.
+ *
+ * COMMON USE CASES:
+ *   • Data privacy / encapsulation   (private variables pattern)
+ *   • Factory functions              (createMultiplier, createAdder)
+ *   • Partial application & currying
+ *   • Memoization (caching in a closed-over Map)
+ *   • Debounce / throttle            (closed-over timeoutId)
+ *   • Event handler state            (closed-over counters)
+ *   • Module pattern (pre-ES Modules)
+ *
+ * COMMON GOTCHA — var IN LOOPS:
+ *   `var` is function-scoped — all iterations share ONE variable.
+ *   Each setTimeout callback closes over the SAME `i`, which is already
+ *   its final value when they execute.
+ *   Fix: use `let` (creates a new binding per iteration) or IIFE.
+ *
+ * IMPORTANT POINTS:
+ *   1. Closures close over LIVE variable bindings, not value snapshots —
+ *      if the outer variable changes, all closures see the new value.
+ *   2. Every function call creates a NEW closure with its own environment —
+ *      independent closures do not share state unless on the same object.
+ *   3. Closures are the mechanism behind the module pattern, factories,
+ *      and any pattern that needs private persistent state.
+ *   4. Debounce and throttle are classic real-world closure patterns —
+ *      the timeoutId persists across repeated calls in the closure.
+ *   5. Excessive closures can cause memory leaks if they keep large objects
+ *      alive longer than necessary — be mindful of what you capture.
+ *   6. The var-in-loop bug is the most common closure-related interview
+ *      question — understand both the let and IIFE fixes.
+ *   7. Arrow functions also form closures AND additionally inherit `this`
+ *      from their lexical scope, making them ideal for method callbacks.
+ * ============================================================
  */
 
 /*
@@ -159,3 +204,27 @@ const triple = multiplier(3);
 
 console.log(double(5)); // Output: 10
 console.log(triple(5)); // Output: 15
+
+/*
+ * ============================================================
+ *  CONCLUSION — Key Closure Takeaways
+ * ============================================================
+ *
+ *  1. A closure is NOT a snapshot — it holds a live reference to outer
+ *     variables. If those variables change, the closure sees the update.
+ *  2. Every function CALL creates an independent closure environment.
+ *     Two calls to the same factory produce two separate private states.
+ *  3. The private-variable pattern (counter example) is the simplest and
+ *     most common application of closures — exposing only the operations,
+ *     not the data directly.
+ *  4. The var-in-loop bug happens because var creates ONE shared binding
+ *     for all iterations; `let` creates a fresh binding per iteration,
+ *     while IIFE captures a copy via a parameter.
+ *  5. Debounce works because the returned function closes over a single
+ *     `timeoutId` variable — each new call can clear and reset it.
+ *  6. Closures enable function factories (multiplier, createAdder) that
+ *     produce specialized functions from a generic template.
+ *  7. Be mindful of memory: a closure keeps its entire closed-over scope
+ *     alive — avoid capturing large data structures unnecessarily.
+ * ============================================================
+ */

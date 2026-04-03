@@ -1,16 +1,49 @@
 /*
- * Callbacks:
- * - A callback is a function passed into another function as an argument to be executed later.
- * - Callbacks are often used for handling asynchronous operations, such as handling events, or waiting for a process to complete.
- * - Common use cases include setTimeout, setInterval, array methods like map, filter, etc.
- * 
- *  Problems With Callbacks: 
- *  -> Inversion of control
- *  -> Callback Hell
- */
-
-/*
- * Examples of Callbacks
+ * ============================================================
+ *  CALLBACKS
+ * ============================================================
+ *
+ * DEFINITION:
+ *   A callback is any function passed as an argument to another function,
+ *   to be invoked at a later point — either synchronously (immediately,
+ *   inside the outer function) or asynchronously (after an I/O event,
+ *   timer, or network response).
+ *
+ * SYNCHRONOUS vs ASYNCHRONOUS CALLBACKS:
+ *   Synchronous callback  → called immediately within the same call stack.
+ *     Examples: Array.map(), Array.forEach(), Array.sort() comparator.
+ *   Asynchronous callback → queued; called when the event loop picks it up.
+ *     Examples: setTimeout, setInterval, fs.readFile, XMLHttpRequest.
+ *
+ * NODE.js ERROR-FIRST CALLBACK CONVENTION:
+ *   The de-facto standard for async callbacks in Node.js:
+ *     callback(error, result)
+ *   • First argument is always `error` (null if none).
+ *   • Second (or more) arguments carry the result on success.
+ *   Always check the error argument before using the result.
+ *
+ * CALLBACK PROBLEMS:
+ *   1. Inversion of Control (IoC) — you hand your callback to a third-
+ *      party function.  You no longer control WHEN or HOW MANY TIMES it
+ *      is called, or WHETHER errors are handled before it runs. (→ CH 08)
+ *   2. Callback Hell / Pyramid of Doom — deeply nested callbacks for
+ *      sequential async work become unreadable and hard to maintain.
+ *      Promises and async/await solve both problems. (→ CH 09-14)
+ *
+ * IMPORTANT POINTS:
+ *   1. Synchronous callbacks run BEFORE the calling function returns;
+ *      async callbacks run AFTER the current call stack unwinds.
+ *   2. Always handle the error argument first in Node-style callbacks.
+ *   3. Callback hell is not just an aesthetic problem — deeply nested
+ *      error paths are easy to miss, causing silent failures.
+ *   4. A callback is just a function — it can be arrow, named, or declared.
+ *   5. Passing too many responsibilities to one callback violates SRP;
+ *      split callbacks to keep each focused on one task.
+ *   6. Array methods (map, filter, reduce) accept synchronous callbacks —
+ *      they are NOT async, even though they look similar to event APIs.
+ *   7. Promises wrap the callback pattern and restore control to the caller,
+ *      while async/await makes the code look synchronous again.
+ * ============================================================
  */
 
 // 1. Basic Callback Example
@@ -132,3 +165,29 @@ delayMessage("This message is delayed by 2 seconds", 2000, afterMessage);
 // (After 2 seconds)
 // This message is delayed by 2 seconds
 // This is the callback after the message.
+
+/*
+ * ============================================================
+ *  CONCLUSION — Key Callback Takeaways
+ * ============================================================
+ *
+ *  1. Callbacks are the OLDEST async pattern in JavaScript — every
+ *     modern async tool (Promises, async/await) is built on top of them.
+ *  2. Synchronous callbacks (array methods) run inline; asynchronous
+ *     callbacks (setTimeout, etc.) run after the current stack clears.
+ *  3. Always follow the Node error-first convention — check `err` before
+ *     using the result, or else silent failures will haunt you.
+ *  4. Callback hell is a structural problem: indent level directly
+ *     represents coupling. Flatten it with named functions, Promises, or
+ *     async/await (see CH 09 and CH 14).
+ *  5. Inversion of Control is the deeper problem: you trust a 3rd-party
+ *     function to call your callback correctly, at the right time, once.
+ *     Promises restore that control to you.
+ *  6. Array HOF callbacks (map, filter) are synchronous — you cannot
+ *     use await inside them without wrapping the entire chain in an async
+ *     function and using Promise.all.
+ *  7. Refactoring callback-based code to Promises is mechanical: wrap the
+ *     function body in `new Promise((resolve, reject) => { ... })` and
+ *     call resolve/reject where the callback was called.
+ * ============================================================
+ */

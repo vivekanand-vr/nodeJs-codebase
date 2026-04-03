@@ -1,16 +1,54 @@
-/**
- * JavaScript Generators
+/*
+ * ============================================================
+ *  GENERATORS
+ * ============================================================
  *
- * Definition:
- * A generator is a special function that can pause execution and resume later.
- * It uses the `function*` syntax and `yield` keyword to produce a sequence of values on demand.
+ * DEFINITION:
+ *   A generator is a special function (function*) that can PAUSE its own
+ *   execution mid-body using the `yield` keyword, and RESUME from where
+ *   it left off on the next .next() call.
+ *   Calling a generator function does NOT execute any body code — it
+ *   returns a Generator object (which is both an iterator AND an iterable).
  *
- * Key Points:
- * - Defined using `function*` syntax.
- * - Use `yield` to pause and return a value.
- * - Calling a generator returns an iterator.
- * - Use `.next()` to get each value, or use in `for...of` loop.
- * - Useful for lazy evaluation, asynchronous workflows, and infinite sequences.
+ * SYNTAX:
+ *   function* myGenerator() {
+ *       yield value1;  // pauses; returns { value: value1, done: false }
+ *       yield value2;  // pauses again
+ *       return final;  // ends;  returns { value: final, done: true }
+ *   }
+ *   const gen = myGenerator(); // returns a Generator — NO body runs yet
+ *   gen.next();                // runs until first yield
+ *
+ * BIDIRECTIONAL DATA FLOW:
+ *   gen.next(passedValue) — the passed value becomes the RESULT of the
+ *   `yield` expression inside the generator.  First .next() call's
+ *   argument is always ignored (no yield to receive it yet).
+ *
+ * GENERATOR vs ITERATOR:
+ *   Generators automatically implement BOTH iterable and iterator protocols.
+ *   You can use them in for...of, spread, Array.from without extra code.
+ *
+ * USE CASES:
+ *   • Lazy infinite sequences (ID generators, Fibonacci, random)
+ *   • Custom iterators without boilerplate
+ *   • Cooperative multitasking / state machines
+ *   • Async flow control (pre-async/await — libraries like co used this)
+ *   • Middleware pipelines (Redux-saga uses generators)
+ *
+ * IMPORTANT POINTS:
+ *   1. Calling a generator function returns a generator OBJECT — no code
+ *      in the body runs until the first .next() call.
+ *   2. Each .next() resumes execution until the next yield or return.
+ *   3. Values passed to .next(value) become the result of the PREVIOUS
+ *      yield expression inside the generator body.
+ *   4. A generator is exhausted (done: true) after it reaches `return`
+ *      or falls off the end — further .next() calls return { value: undefined, done: true }.
+ *   5. You can use for...of on a generator — it stops automatically when
+ *      done: true, and the `return` value is NOT included.
+ *   6. `yield*` delegates to another iterable, flattening it inline.
+ *   7. Generators remember ALL local variables between yields — this is
+ *      what makes them powerful state machines.
+ * ============================================================
  */
 
 // -----------------------------
@@ -99,3 +137,59 @@ const gen = testGen();
 console.log(gen.next()); // Runs "Before first yield", then yields 1
 console.log(gen.next()); // Runs "Between yields", then yields 2
 console.log(gen.next()); // Runs "After second yield", then returns 3
+
+// ─── 6. yield* DELEGATION ────────────────────────────────────────────────
+console.log("\n=== 6. yield* — delegate to another iterable ===");
+
+function* inner() {
+    yield "a";
+    yield "b";
+}
+
+function* outer() {
+    yield 1;
+    yield* inner();  // flattens inner's values inline
+    yield 2;
+}
+
+console.log([...outer()]); // Output: [1, "a", "b", 2]
+
+// ─── 7. GENERATOR AS INFINITE ID SEQUENCE ───────────────────────────────
+console.log("\n=== 7. Infinite unique ID generator ===");
+
+function* idGenerator() {
+    let id = 1;
+    while (true) {
+        yield id++;
+    }
+}
+
+const ids = idGenerator();
+console.log(ids.next().value); // Output: 1
+console.log(ids.next().value); // Output: 2
+console.log(ids.next().value); // Output: 3
+// Never call in for...of without break — infinite!
+
+/*
+ * ============================================================
+ *  CONCLUSION — Key Generator Takeaways
+ * ============================================================
+ *
+ *  1. Calling a generator function returns a Generator object — NO body
+ *     code executes until the first .next() call.
+ *  2. `yield` pauses execution and returns the yielded value to the caller;
+ *     the generator remembers ALL local state across pauses.
+ *  3. Values passed into .next(value) become the result of the previous
+ *     yield expression — enabling bidirectional communication.
+ *  4. A generator implements both iterable and iterator protocols, so
+ *     for...of, spread, and destructuring all work natively.
+ *  5. for...of on a generator does NOT receive the `return` value (only
+ *     yield values); manually calling .next() after done: true is safe
+ *     (returns { value: undefined, done: true } on every call).
+ *  6. yield* delegates to another iterable inline — useful for composing
+ *     or flattening nested generators.
+ *  7. Infinite generators (while(true) loop with yield) are powerful for
+ *     IDs, Fibonacci, and event streams — just never iterate them without
+ *     an exit condition.
+ * ============================================================
+ */

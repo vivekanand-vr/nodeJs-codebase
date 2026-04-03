@@ -1,17 +1,64 @@
-/**
- * Event Loop Execution Order (Priority):
- *  Call Stack (synchronous code):
- *  JS always executes all synchronous code first — line by line — inside the call stack.
- * 
- *  Microtask Queue:
- *  Once the call stack is empty, the event loop prioritizes the microtask queue, which includes:
- *  - .then() / .catch() / .finally() from Promises
- *  - queueMicrotask()
- *  - MutationObserver callbacks (browser APIs)
- * 
- *  Callback Queue (a.k.a. Macrotask Queue):
- *  After the microtask queue is completely drained, the event loop picks one task from the callback queue
- *  (like setTimeout, setInterval, setImmediate, or DOM events), and pushes it to the call stack.
+/*
+ * ============================================================
+ *  PROMISE INTERNALS — EVENT LOOP, MICROTASK QUEUE, EXECUTION ORDER
+ * ============================================================
+ *
+ * DEFINITION:
+ *   Understanding HOW promises execute requires understanding the JavaScript
+ *   Event Loop and the two task queues it manages.
+ *
+ * JAVASCRIPT EXECUTION MODEL:
+ *   JS is single-threaded — only one piece of code executes at a time.
+ *   The engine uses an Event Loop to handle asynchronous work:
+ *
+ *   ┌─────────────────────────────────────────────────────────┐
+ *   │  CALL STACK (synchronous, always first)                 │
+ *   │  → executes all sync code line by line                  │
+ *   └─────────────────────────────────────────────────────────┘
+ *            ↓  (when call stack empties)
+ *   ┌─────────────────────────────────────────────────────────┐
+ *   │  MICROTASK QUEUE  (higher priority)                     │
+ *   │  → Promise .then/.catch/.finally handlers               │
+ *   │  → queueMicrotask()                                     │
+ *   │  → MutationObserver                                     │
+ *   │  Drained FULLY before moving on                        │
+ *   └─────────────────────────────────────────────────────────┘
+ *            ↓  (when microtask queue is empty)
+ *   ┌─────────────────────────────────────────────────────────┐
+ *   │  MACROTASK / CALLBACK QUEUE  (lower priority)           │
+ *   │  → setTimeout, setInterval callbacks                    │
+ *   │  → setImmediate (Node.js)                               │
+ *   │  → I/O callbacks                                        │
+ *   │  ONE task picked per event loop iteration              │
+ *   └─────────────────────────────────────────────────────────┘
+ *
+ * EXECUTION ORDER RULE (memorize):
+ *   Sync code → ALL microtasks → ONE macrotask → ALL microtasks → ...
+ *
+ * PROMISE EXECUTOR:
+ *   The executor function inside `new Promise((resolve, reject) => {...})`
+ *   runs SYNCHRONOUSLY — it is part of the call stack, not a queue.
+ *
+ * PROMISE HANDLERS (.then / .catch):
+ *   They are ALWAYS asynchronous — queued as microtasks after the current
+ *   call stack finishes, even if the Promise is already resolved.
+ *
+ * IMPORTANT POINTS:
+ *   1. The Promise executor runs synchronously — immediately inside the
+ *      constructor call, part of the current call stack.
+ *   2. .then() / .catch() handlers are ALWAYS microtasks — they never
+ *      run inline with the current synchronous block.
+ *   3. Microtasks are fully drained before the event loop processes ANY
+ *      macrotask — a long microtask chain starves setTimeout callbacks.
+ *   4. setTimeout(fn, 0) does NOT run fn next — it queues to the macrotask
+ *      queue, which only fires after the microtask queue is emptied.
+ *   5. A rejected promise without a .catch() causes an unhandledRejection
+ *      event in Node.js (terminates in strict mode) or a console warning.
+ *   6. Chained .then() calls each create a new microtask — they execute
+ *      one-per-event-loop-microtask-phase in order.
+ *   7. process.nextTick() in Node.js runs even BEFORE the microtask queue —
+ *      it has the highest async priority in Node.
+ * ============================================================
  */
 
 // Example 1: Understanding internal execution of Promises with setTimeout and handlers
@@ -166,3 +213,25 @@ So final output will be:
   Download completed  
   value is Dummy data
 */
+
+/*
+ * ============================================================
+ *  CONCLUSION — Key Promise Internals Takeaways
+ * ============================================================
+ *
+ *  1. The call stack runs to completion first — no async code ever
+ *     interrupts synchronous execution mid-flight.
+ *  2. The executor of `new Promise(...)` is SYNCHRONOUS — it belongs to
+ *     the current call stack, not any queue.
+ *  3. Promise .then() / .catch() handlers are MICROTASKS — they run after
+ *     all synchronous code, but BEFORE any setTimeout callback.
+ *  4. Microtask queue is drained COMPLETELY before the event loop picks
+ *     the next macrotask — even newly added microtasks run before that.
+ *  5. setTimeout(fn, 0) orders fn to the macrotask queue — last in the
+ *     async priority order; Promise handlers always run before it.
+ *  6. Chained .then() handlers each become a new microtask, running in
+ *     order after the Promise settles.
+ *  7. Visualize execution order as:
+ *     sync → microtasks (fully) → ONE macrotask → microtasks (fully) → ...
+ * ============================================================
+ */

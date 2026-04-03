@@ -1,23 +1,67 @@
 /*
- * Promises in JavaScript:
- * - Promises are objects that represent the eventual completion (or failure) of an asynchronous operation.
- * - They simplify writing asynchronous code, avoiding "callback hell" and resolves problem of IOC. 
- * - Promises have three states: pending, fulfilled, and rejected. They are returned immediately after calling. 
- * - Promise will act as a placeholder for the data we hope to get back sometime in future.
- * - Promise cretion is synchronous in nature as it's native to js.
- * - Once the future task done is the promises will automatically execute the attached functionality.
- * - With whatever argument we pass in the 'resolve'/'reject' function during promise creation will be assigned as
- *   value of that promise.
- * - Promise will stay in pending state if not called 'reject'/'resolve'
- * 
- *  Common Use Cases of Promises:
- *  -----------------------------
- *  -> Fetching Data from APIs
- *  -> Reading Files Asynchronously
- *  -> Executing Multiple Asynchronous Operations Concurrently
- *  -> Chaining Dependent Asynchronous Operations
- *  -> Handling Animations or Timed Events
- *  -> Loading External Scripts or Resources
+ * ============================================================
+ *  PROMISES
+ * ============================================================
+ *
+ * DEFINITION:
+ *   A Promise is an object that represents the eventual completion
+ *   (or failure) of an asynchronous operation and its resulting value.
+ *   It is a placeholder — returned immediately while the actual value
+ *   arrives later (from a network, timer, or I/O).
+ *
+ * PROMISE STATES (immutable once settled):
+ *   State        Meaning                    Transitions to
+ *   ──────────   ────────────────────────   ──────────────────
+ *   pending      Initial; not yet done      fulfilled OR rejected
+ *   fulfilled    Completed successfully     (terminal — no further change)
+ *   rejected     Failed                     (terminal — no further change)
+ *
+ * CREATION:
+ *   new Promise((resolve, reject) => { ... })
+ *   • The executor function runs SYNCHRONOUSLY inside the constructor.
+ *   • Call resolve(value) to fulfill; call reject(reason) to reject.
+ *   • Calling both, or calling one twice, only the FIRST call counts.
+ *
+ * CONSUMPTION:
+ *   promise
+ *     .then(onFulfilled, onRejected?)    — handles settled state
+ *     .catch(onRejected)                 — shorthand for .then(null, onRejected)
+ *     .finally(onFinally)                — runs regardless of outcome
+ *
+ * CHAINING:
+ *   .then() always returns a NEW promise — enabling a flat chain instead
+ *   of nested callbacks.  Each handler can return a value (auto-wrapped)
+ *   or another Promise (which the chain waits for).
+ *
+ * STATIC METHODS:
+ *   Method                  Resolves when...
+ *   ──────────────────────  ──────────────────────────────────────────
+ *   Promise.resolve(v)      Immediately fulfilled with v
+ *   Promise.reject(r)       Immediately rejected with r
+ *   Promise.all([...])      ALL settle fulfilled; rejects if any rejects
+ *   Promise.allSettled([])  ALL settle (fulfilled or rejected)
+ *   Promise.race([...])     FIRST to settle (fulfilled OR rejected)
+ *   Promise.any([...])      FIRST to fulfill; AggregateError if all reject
+ *
+ * SOLVES CALLBACK PROBLEMS:
+ *   • IoC trust — you own the .then() chain, not the library.
+ *   • Callback hell — flat .then() chains instead of nested callbacks.
+ *   • Error propagation — .catch() at the end catches ANY rejection.
+ *
+ * IMPORTANT POINTS:
+ *   1. The executor runs SYNCHRONOUSLY; .then() handlers are always async
+ *      (microtask queue) even if the Promise is already fulfilled.
+ *   2. Promises are IMMUTABLE once settled — you cannot re-resolve them.
+ *   3. A Promise with no .catch() will produce an unhandled rejection
+ *      warning in Node.js — always attach error handling.
+ *   4. Returning a thenable from .then() causes the chain to adopt its state.
+ *   5. Promise.all() short-circuits on the FIRST rejection — use
+ *      Promise.allSettled() when you need ALL results regardless.
+ *   6. Promise.any() is the dual of Promise.all() — it resolves on FIRST
+ *      fulfillment and only rejects if ALL reject (AggregateError).
+ *   7. Native Promises are faster and more spec-compliant than most
+ *      third-party promise libraries — prefer them in modern code.
+ * ============================================================
  */
 
 /*
@@ -209,4 +253,28 @@ console.log("This line runs before the Promise resolves.");
  * Calling fetchData...
  * This line runs before the Promise resolves.
  * Rejected: Failed to fetch data.
+ */
+
+/*
+ * ============================================================
+ *  CONCLUSION — Key Promise Takeaways
+ * ============================================================
+ *
+ *  1. Promises represent a FUTURE value — created (pending) now, settled
+ *     later (fulfilled or rejected).  Once settled, state never changes.
+ *  2. The executor function runs SYNCHRONOUSLY inside the constructor,
+ *     but .then() / .catch() handlers always run asynchronously
+ *     (microtask queue), even if the Promise is already resolved.
+ *  3. .then() returns a NEW Promise — enabling flat, readable chains
+ *     instead of the "pyramid of doom" from nested callbacks.
+ *  4. A rejection without a .catch() is an unhandled rejection — always
+ *     attach a .catch() at the end of every chain.
+ *  5. Promise.all() fails-fast on the first rejection; Promise.allSettled()
+ *     waits for all and gives you each result regardless of outcome.
+ *  6. Promise.any() resolves on the first success; Promise.race() resolves
+ *     (or rejects) on the first ANY settlement — choose based on intent.
+ *  7. Promises restore Inversion of Control to the caller — you decide
+ *     when and how to react to the settled value, not the library that
+ *     returned the Promise.
+ * ============================================================
  */
