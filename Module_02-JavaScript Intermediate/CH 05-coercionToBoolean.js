@@ -131,7 +131,9 @@ console.log(Boolean([]));       // Output: true   — [] is truthy
 console.log([] == false);       // Output: true
 // Why? == coercion: both get ToNumber: [] → "" → 0, false → 0 → 0 == 0 → true
 // This is NOT a contradiction: == and Boolean() use DIFFERENT coercion paths.
-console.log([] === false);      // Output: false  — strict: different types
+// eslint-disable-next-line eqeqeq
+const emptyArr = /** @type {unknown} */ ([]); // typed as unknown to avoid "always false" lint warning
+console.log(emptyArr === false); // Output: false  — strict: different types (always false by design)
 
 // ─── 8. ToBoolean IN LOOPS AND TERNARY ──────────────────────────
 
