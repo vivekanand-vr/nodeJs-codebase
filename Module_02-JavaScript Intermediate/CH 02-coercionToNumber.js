@@ -1,84 +1,185 @@
 /*
- * Implicit ToNumber Conversions:
- * JavaScript applies the ToNumber operation in specific scenarios where
- * a value must be coerced into a number, such as arithmetic operations,
- * comparisons, and boolean contexts.
+ * ============================================================
+ *  CH 02 - Coercion → ToNumber
+ * ============================================================
+ *
+ *  THEORY:
+ *  -------
+ *  The ToNumber abstract operation converts a value to a number.
+ *  It is triggered implicitly by arithmetic operators (except +
+ *  when a string is involved), comparison operators, and the
+ *  unary + operator. It can also be triggered explicitly with
+ *  Number(), parseInt(), and parseFloat().
+ *
+ *  ToNumber CONVERSION TABLE:
+ *  --------------------------
+ *   Input              | Result
+ *  --------------------|--------
+ *   undefined          | NaN
+ *   null               | 0
+ *   true               | 1
+ *   false              | 0
+ *   "" (empty string)  | 0
+ *   " " (whitespace)   | 0
+ *   "0"                | 0
+ *   "42"               | 42
+ *   "3.14"             | 3.14
+ *   "0xff"             | 255   (hex format)
+ *   "0o11"             | 9     (octal format)
+ *   "0b1010"           | 10    (binary format)
+ *   "123abc"           | NaN   (not a clean number)
+ *   []                 | 0     ([] → "" → 0)
+ *   [42]               | 42    ([42] → "42" → 42)
+ *   [1,2]              | NaN   ([1,2] → "1,2" → NaN)
+ *   {}                 | NaN   ({} → "[object Object]")
+ *
+ *  KEY POINTS:
+ *  -----------
+ *  - Number() is strict: any invalid character anywhere → NaN.
+ *  - parseInt() is "lazy": reads left to right, stops at first invalid char.
+ *  - parseInt() ALWAYS returns an integer (truncates, does not round).
+ *  - parseFloat() reads decimal points too, stops at first non-numeric char.
+ *  - parseInt() accepts an optional radix (base) as second argument.
+ *  - The + unary operator is a shorthand for Number().
+ *  - NaN is the result when coercion cannot produce a meaningful number.
+ *  - Whitespace-only strings coerce to 0 (they are trimmed first).
+ * ============================================================
  */
 
-// 1. Implicit Conversion in Arithmetic Operations
-console.log("\n1. Arithmetic Operations:");
+// ─── 1. IMPLICIT ToNumber IN ARITHMETIC ────────────────────────
 
-// Addition
-console.log("5" - 2); // Output: 3 ("5" is coerced to 5)
-console.log("5" * 2); // Output: 10 ("5" is coerced to 5)
-console.log("5" / 2); // Output: 2.5 ("5" is coerced to 5)
-console.log("5" % 2); // Output: 1 ("5" is coerced to 5)
+console.log("1. Implicit ToNumber in Arithmetic:");
 
-// Addition with "+" behaves differently (string concatenation)
-console.log("5" + 2); // Output: "52" (string concatenation, not coercion)
+// All of: -, *, /, %, ** trigger ToNumber on both operands
+console.log("5" - 2);    // Output: 3      — "5" → 5, then 5-2
+console.log("5" * 2);    // Output: 10
+console.log("5" / 2);    // Output: 2.5
+console.log("5" % 2);    // Output: 1
+console.log("2" ** 8);   // Output: 256
 
-// Non-numeric Strings
-console.log("hello" - 2); // Output: NaN (invalid numeric string)
-console.log("hello" * 2); // Output: NaN
+// + behaves differently — string context wins with +
+console.log("5" + 2);    // Output: "52"   — concatenation, NOT addition
 
-// 2. Implicit Conversion in Comparisons
-console.log("\n2. Comparisons:");
+// Non-numeric strings → NaN
+console.log("hello" - 2);  // Output: NaN
+console.log("hello" * 2);  // Output: NaN
+console.log("12abc" - 0);  // Output: NaN  — Number() is strict, unlike parseInt
 
-// Abstract Equality (==) triggers coercion
-console.log(5 == "5"); // Output: true ("5" is coerced to 5)
-console.log(0 == ""); // Output: true ("" is coerced to 0)
-console.log(null == 0); // Output: false (null is not coerced to 0)
-console.log(undefined == 0); // Output: false (undefined is not coerced to 0)
+// ─── 2. IMPLICIT ToNumber IN COMPARISONS ───────────────────────
 
-// Relational Operators
-console.log("10" > 5); // Output: true ("10" is coerced to 10)
-console.log("10" < "2"); // Output: false (lexicographical comparison)
+console.log("\n2. Implicit ToNumber in Comparisons:");
 
-// 3. Implicit Conversion with Logical Operators
-console.log("\n3. Logical Operators:");
+// Abstract equality (==) between number and string → coerces string
+console.log(5 == "5");        // Output: true
+console.log(0 == "");         // Output: true  — "" → 0
+console.log(0 == " ");        // Output: true  — " " → 0 (whitespace trimmed)
+console.log(null == 0);       // Output: false — null never coerces with ==
+console.log(undefined == 0);  // Output: false
 
-// Logical AND (&&) and OR (||) can invoke ToNumber indirectly
-console.log("5" && 2); // Output: 2 (truthy values pass through)
-console.log(0 && 2); // Output: 0 (falsy value stops evaluation)
-console.log("5" || 2); // Output: "5" (first truthy value is returned)
+// Relational operators: both sides coerced to numbers (if not both strings)
+console.log("10" > 5);        // Output: true  — "10" → 10
+console.log("10" < "9");      // Output: true  — lexicographic! "1" < "9" (both strings)
+console.log("10" < 9);        // Output: false — "10" → 10, then 10 < 9
 
-// 4. Implicit Conversion in Unary Operators
-console.log("\n4. Unary Operators:");
+// ─── 3. UNARY + (explicit shorthand for ToNumber) ──────────────
 
-// Unary Plus (+) forces ToNumber conversion
-console.log(+"5"); // Output: 5 (string coerced to number)
-console.log(+"hello"); // Output: NaN (invalid numeric string)
+console.log("\n3. Unary + Operator:");
 
-// Unary Negation (-)
-console.log(-"5"); // Output: -5 (string coerced to number)
+console.log(+"5");         // Output: 5
+console.log(+"3.14");      // Output: 3.14
+console.log(+"");          // Output: 0
+console.log(+" ");         // Output: 0      — whitespace trimmed
+console.log(+"hello");     // Output: NaN
+console.log(+true);        // Output: 1
+console.log(+false);       // Output: 0
+console.log(+null);        // Output: 0
+console.log(+undefined);   // Output: NaN
+console.log(+[]);          // Output: 0      — [] → "" → 0
+console.log(+[42]);        // Output: 42     — [42] → "42" → 42
+console.log(+[1,2]);       // Output: NaN    — [1,2] → "1,2" → NaN
+console.log(+{});          // Output: NaN    — {} → "[object Object]" → NaN
 
-// 5. Edge Cases in Implicit ToNumber Conversion
-console.log("\n5. Edge Cases:");
+// ─── 4. Number() — EXPLICIT CONVERSION ─────────────────────────
 
-// Boolean to Number
-console.log(true + 1); // Output: 2 (true is coerced to 1)
-console.log(false + 1); // Output: 1 (false is coerced to 0)
+console.log("\n4. Number() Explicit Conversion:");
 
-// Null and Undefined
-console.log(null + 5); // Output: 5 (null is coerced to 0)
-console.log(undefined + 5); // Output: NaN (undefined cannot be coerced to a number)
+console.log(Number(42));        // Output: 42
+console.log(Number("42"));      // Output: 42
+console.log(Number("  42  "));  // Output: 42     — whitespace trimmed
+console.log(Number(""));        // Output: 0
+console.log(Number(" "));       // Output: 0
+console.log(Number("3.14"));    // Output: 3.14
+console.log(Number("0xff"));    // Output: 255    — hex
+console.log(Number("0o11"));    // Output: 9      — octal
+console.log(Number("0b1010"));  // Output: 10     — binary
+console.log(Number("12abc"));   // Output: NaN    — any invalid char → NaN
+console.log(Number(true));      // Output: 1
+console.log(Number(false));     // Output: 0
+console.log(Number(null));      // Output: 0
+console.log(Number(undefined)); // Output: NaN
+console.log(Number(NaN));       // Output: NaN
 
-// Arrays and Objects
-console.log([1] + 5); // Output: "15" ([1] is coerced to "1" and concatenated)
-console.log([1] - 5); // Output: -4 ([1] is coerced to 1)
-console.log({} + 5); // Output: "[object Object]5" (object coerced to string)
+// ─── 5. parseInt() — LAZY INTEGER PARSING ──────────────────────
 
-// Hexadecimal Number String (Starting with 0x)
-console.log("0xaf" - 1); // Output: 174 (Because 0xaf is a valid hexadecimal number)
-console.log("0xabc" * 1); // Output: 2748 ( 0xabc is a valid Hexadecimal fomat)
+console.log("\n5. parseInt():");
 
-// Octal Numbers as Strings (Starting with 0o)
-console.log("0o11" * 1); // Outupt: 9 (Because 0o11 is a valid octal number)
+console.log(parseInt("42"));      // Output: 42
+console.log(parseInt("42.9"));    // Output: 42    — truncates decimals
+console.log(parseInt("42px"));    // Output: 42    — stops at first invalid char
+console.log(parseInt("px42"));    // Output: NaN   — starts with non-digit
+console.log(parseInt("  42  "));  // Output: 42    — whitespace trimmed
+console.log(parseInt("0xff"));    // Output: 255   — auto-detects hex prefix
+console.log(parseInt("ff", 16));  // Output: 255   — explicit radix 16
+console.log(parseInt("11", 2));   // Output: 3     — binary: 11₂ = 3₁₀
+console.log(parseInt("17", 8));   // Output: 15    — octal: 17₈ = 15₁₀
+console.log(parseInt(""));        // Output: NaN   — nothing to parse
 
-// Summary Note
-console.log("\nSummary Note:");
-console.log(
-  "Implicit ToNumber conversions are triggered in arithmetic operations, " +
-  "comparisons, and boolean evaluations. Be cautious as these conversions " +
-  "may produce unexpected results, especially with mixed types."
-);
+// ─── 6. parseFloat() — LAZY FLOAT PARSING ──────────────────────
+
+console.log("\n6. parseFloat():");
+
+console.log(parseFloat("3.14"));     // Output: 3.14
+console.log(parseFloat("3.14abc"));  // Output: 3.14   — stops at "a"
+console.log(parseFloat("abc"));      // Output: NaN
+console.log(parseFloat("3.14.15"));  // Output: 3.14   — stops at second "."
+console.log(parseFloat("  3.14")); // Output: 3.14
+
+// ─── 7. EDGE CASES ─────────────────────────────────────────────
+
+console.log("\n7. Edge Cases:");
+
+// Hex/Octal string coercion in arithmetic:
+console.log("0xaf" - 1);    // Output: 174   — "0xaf" is valid hex → 175, minus 1
+console.log("0xabc" * 1);   // Output: 2748
+console.log("0o11" * 1);    // Output: 9     — valid octal
+console.log("0b101" * 1);   // Output: 5     — valid binary
+
+// Arrays and objects (go through ToPrimitive first):
+console.log([1] - 5);       // Output: -4    — [1] → "1" → 1, then 1-5
+console.log([1] + 5);       // Output: "15"  — [1] → "1", then string context wins
+console.log({} + 5);        // Output: "[object Object]5" OR 5 depending on context
+
+// The curious case of logical operators and numbers:
+console.log("5" && 2);      // Output: 2     — "5" is truthy, returns right operand
+console.log(0 && 2);        // Output: 0     — 0 is falsy, short-circuits
+console.log("5" || 2);      // Output: "5"   — "5" is truthy, returns it
+
+/*
+ * ============================================================
+ *  CONCLUSION / KEY TAKEAWAYS
+ * ============================================================
+ *
+ *  1. The unary + and Number() both call ToNumber, but Number()
+ *     is more readable and preferred for explicit conversions.
+ *  2. parseInt() is "greedy from the left" — it takes what it can
+ *     and ignores the rest. Always pass a radix (parseInt(x, 10))
+ *     to avoid unintended octal/hex parsing in old engines.
+ *  3. Number() is "all or nothing" — if anything is invalid, NaN.
+ *  4. Whitespace-only strings coerce to 0, not NaN — a common surprise.
+ *  5. null → 0 but undefined → NaN in numeric context.
+ *  6. Arrays go through ToPrimitive (→ toString → join(",")) before
+ *     ToNumber: [] → "" → 0, [42] → "42" → 42, [1,2] → "1,2" → NaN.
+ *  7. Binary (0b), octal (0o), hex (0x) prefixed strings are valid
+ *     inputs for Number() and parseInt() with the right radix.
+ * ============================================================
+ */
