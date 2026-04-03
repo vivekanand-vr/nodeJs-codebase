@@ -1,16 +1,45 @@
-/*
- * TypeScript Classes:
- * - Enhanced JavaScript classes with type annotations
- * - Access modifiers: public, private, protected
- * - Abstract classes and methods
- * - Static members and methods
- * 
- * Advanced Features:
- * -> Parameter properties for constructor shorthand
- * -> Getters and setters with type safety
- * -> Method overloading and generic methods
- * -> Decorators and metadata (experimental)
- */
+/* ===================================================================
+ * CH 05 — TypeScript Classes
+ * ===================================================================
+ *
+ * WHAT DO TS CLASSES ADD OVER JS CLASSES?
+ *   TypeScript classes extend ES6 classes with:
+ *   • Access modifiers (public, private, protected, readonly)
+ *   • Typed properties and method signatures
+ *   • Abstract classes and abstract methods
+ *   • Parameter property shorthand in constructors
+ *   • Generic class parameters
+ *   • Strict `this` typing
+ *
+ * ACCESS MODIFIER SUMMARY
+ * ┌─────────────────┬─────────────┬──────────────┬──────────────────┐
+ * │ Modifier        │ Class itself│ Subclasses   │ Outside class    │
+ * ├─────────────────┼─────────────┼──────────────┼──────────────────┤
+ * │ public (default)│ ✅          │ ✅           │ ✅              │
+ * │ protected       │ ✅          │ ✅           │ ❌              │
+ * │ private         │ ✅          │ ❌           │ ❌              │
+ * │ readonly        │ Read-only after init (any visibility)        │
+ * └─────────────────┴─────────────┴──────────────┴─────────────────┘
+ *
+ * KEY CONCEPTS
+ * -> Parameter property : `constructor(public name: string)` auto-declares
+ *    AND assigns the property — saves two lines per field
+ * -> Abstract class     : cannot be instantiated directly; provides a
+ *    blueprint that subclasses must fill with concrete implementations
+ * -> Static members     : belong to the CLASS, not instances
+ * -> Generic class      : `class Box<T>` — carries a type parameter
+ * -> Mixin pattern      : compose behaviours via function-applied base classes
+ *
+ * IMPORTANT NOTES
+ * 1. `private` is a TypeScript compile-time guard only — at runtime it is
+ *    still accessible (use `#field` ES private fields for runtime privacy).
+ * 2. Abstract classes CAN have concrete method implementations — only
+ *    `abstract` methods MUST be overridden.
+ * 3. A class can `extend` only one class but `implement` many interfaces.
+ * 4. Getters and setters let you intercept property access with type safety.
+ * 5. Method overloading in classes follows the same pattern as standalone
+ *    function overloads.
+ * =================================================================== */
 
 /*
  * 1. Basic Class Definition
@@ -50,9 +79,7 @@ console.log(person.greet());
 person.haveBirthday();
 console.log("Person ID:", person.id);
 
-/*
-* 2. Access Modifiers
-*/
+// ─── 2. Access Modifiers ────────────────────────────────────────────────────────
 
 class BankAccount {
   public accountNumber: string;      // Public (default)
@@ -98,9 +125,7 @@ account.deposit(500);
 account.withdraw(200, "1234");
 console.log("Balance:", account.getBalance("1234"));
 
-/*
-* 3. Parameter Properties (Constructor Shorthand)
-*/
+// ─── 3. Parameter Properties (Constructor Shorthand) ───────────────────────
 
 class Employee {
   // Parameter properties - automatically creates and assigns properties
@@ -141,9 +166,7 @@ let employee = new Employee(101, "John Doe", 50000, "Engineering");
 console.log(employee.getEmployeeInfo());
 console.log("Net salary:", employee.getNetSalary());
 
-/*
-* 4. Inheritance
-*/
+// ─── 4. Inheritance (extends + super) ────────────────────────────────────
 
 class Manager extends Employee {
   private directReports: Employee[] = [];
@@ -185,9 +208,7 @@ let teamMember = new Employee(102, "Bob Johnson", 60000, "Engineering");
 manager.addDirectReport(teamMember);
 console.log(manager.getTeamInfo());
 
-/*
-* 5. Static Members
-*/
+// ─── 5. Static Members ──────────────────────────────────────────────────────────
 
 class MathUtils {
   static readonly PI = 3.14159;
@@ -225,9 +246,7 @@ let mathUtil2 = new MathUtils();
 console.log("Instance count:", MathUtils.getInstanceCount());
 console.log("Rounded value:", mathUtil1.round(3.14159, 2));
 
-/*
-* 6. Abstract Classes
-*/
+// ─── 6. Abstract Classes ────────────────────────────────────────────────────────
 
 abstract class Vehicle {
   protected brand: string;
@@ -323,9 +342,7 @@ electricCar.start();
 electricCar.charge();
 console.log("Battery level:", electricCar.getBatteryLevel() + "%");
 
-/*
-* 7. Generic Classes
-*/
+// ─── 7. Generic Classes ─────────────────────────────────────────────────────────
 
 class DataStore<T> {
   private items: T[] = [];
@@ -380,9 +397,7 @@ numberStore.add(3);
 console.log("Number store:", numberStore.getAll());
 console.log("Even numbers:", numberStore.filter(num => num % 2 === 0));
 
-/*
-* 8. Method Overloading
-*/
+// ─── 8. Method Overloading ──────────────────────────────────────────────────────
 
 class Calculator {
   // Method overload signatures
@@ -422,9 +437,7 @@ console.log("Add arrays:", calc.add([1, 2], [3, 4]));
 console.log("Multiply 2 numbers:", calc.multiply(4, 5));
 console.log("Multiply 3 numbers:", calc.multiply(2, 3, 4));
 
-/*
-* 9. Getters and Setters
-*/
+// ─── 9. Getters and Setters ─────────────────────────────────────────────────────
 
 class Temperature {
   private _celsius: number = 0;
@@ -467,9 +480,7 @@ console.log(`${temp.celsius}°C = ${temp.fahrenheit}°F = ${temp.kelvin}K`);
 temp.fahrenheit = 100;
 console.log(`${temp.celsius}°C = ${temp.fahrenheit}°F = ${temp.kelvin}K`);
 
-/*
-* 10. Class Composition and Mixins
-*/
+// ─── 10. Class Composition and Mixins ──────────────────────────────────────
 
 // Mixin types
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -523,3 +534,29 @@ console.log("User is active:", user2.isActive);
 let user3 = new EnhancedUser("Charlie");
 user3.activate();
 console.log("Enhanced user:", user3.name, "Active:", user3.isActive, "Created:", user3.getTimestamp());
+
+/* ===================================================================
+ * CONCLUSION
+ * ===================================================================
+ * 1. TypeScript's access modifiers (`public`, `protected`, `private`,
+ *    `readonly`) are compile-time constraints — they do NOT produce
+ *    runtime checks (use `#field` syntax for true JS privacy).
+ * 2. Parameter property shorthand (`constructor(public name: string)`)
+ *    declares AND assigns a field in one line — use it to reduce boilerplate.
+ * 3. `protected` allows subclasses to inherit implementation details
+ *    without exposing them to external code.
+ * 4. Abstract classes define a partial implementation; subclasses must
+ *    fulfil every `abstract` method — TypeScript verifies this.
+ * 5. Static members belong to the CLASS, not instances — access them
+ *    via `ClassName.member`, not `this.member`.
+ * 6. Generic classes (`class DataStore<T>`) let you build type-safe
+ *    containers without sacrificing reusability.
+ * 7. Method overloads present a clean, type-safe public API while the
+ *    single `any`-typed implementation handles all variants internally.
+ * 8. Getters compute derived values from private state; setters validate
+ *    and coerce incoming values — both are fully type-checked.
+ * 9. Mixins provide a composable alternative to deep inheritance chains —
+ *    apply cross-cutting concerns (Timestamped, Activatable) as small,
+ *    focused behaviours rather than baking them into a base class.
+ * =================================================================== */
+export {};

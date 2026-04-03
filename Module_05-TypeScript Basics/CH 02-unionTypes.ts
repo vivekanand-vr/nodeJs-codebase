@@ -1,20 +1,46 @@
-/*
- * TypeScript Union Types:
- * - Union types allow a value to be one of several types
- * - Represented using the pipe (|) operator
- * - Useful when a value can legitimately be different types
- * - Type guards are used to narrow down union types
- * 
- * Benefits:
- * -> Flexibility while maintaining type safety
- * -> Better representation of real-world scenarios
- * -> Enables conditional logic based on types
- * -> Prevents runtime errors through compile-time checking
- */
+/* ===================================================================
+ * CH 02 — TypeScript Union Types
+ * ===================================================================
+ *
+ * WHAT IS A UNION TYPE?
+ *   A union type (A | B) tells TypeScript that a value can be one of
+ *   several types. TypeScript only allows operations that are valid
+ *   for ALL members of the union UNLESS you narrow the type first.
+ *
+ * UNION TYPE MENTAL MODEL
+ *   Think of A | B as the SET UNION of A and B:
+ *   values of type A, values of type B, or values of both.
+ *
+ * NARROWING TECHNIQUES
+ * ┌──────────────────────┬──────────────────────────────────────────┐
+ * │ Technique            │ Code pattern                             │
+ * ├──────────────────────┼──────────────────────────────────────────┤
+ * │ typeof guard         │ if (typeof x === "string")               │
+ * │ instanceof guard     │ if (x instanceof Date)                   │
+ * │ in operator          │ if ("swim" in animal)                    │
+ * │ Equality check       │ if (x === null)                          │
+ * │ Discriminated union  │ switch (shape.kind)                      │
+ * │ Custom type guard    │ function isX(v: any): v is X             │
+ * └──────────────────────┴──────────────────────────────────────────┘
+ *
+ * KEY CONCEPTS
+ * -> Union type   : value is ONE of several types (A | B)
+ * -> Narrowing    : reduce the union to one concrete type inside a branch
+ * -> Discriminant : a shared literal-typed property (e.g. `kind: "circle"`)
+ *                   that uniquely identifies each union member
+ * -> Exhaustive   : `switch` covers ALL branches; leftover typed `never`
+ *
+ * IMPORTANT NOTES
+ * 1. You can only access properties that exist on EVERY member of the
+ *    union without narrowing (e.g. `string | number` → only `.toString()`).
+ * 2. Discriminated unions are the safest pattern for modelling variants
+ *    because TypeScript can prove exhaustiveness via `never`.
+ * 3. An assignment to `never` in the default branch of a switch is a
+ *    compile-time guard: if you add a new shape and forget a case, the
+ *    compiler raises an error.
+ * =================================================================== */
 
-/*
- * 1. Basic Union Types
- */
+// ─── 1. Basic Union Types ────────────────────────────────────────────────────
 
 // Simple union of primitives
 let id: number | string;
@@ -31,9 +57,7 @@ value = true;
 
 console.log("Current value:", value);
 
-/*
- * 2. Function Parameters with Union Types
- */
+// ─── 2. Function Parameters with Union Types ────────────────────────────
 
 function formatInput(input: string | number): string {
     // Type narrowing using typeof
@@ -55,9 +79,7 @@ function getRandomValue(): string | number {
 let randomResult = getRandomValue();
 console.log("Random result:", randomResult);
 
-/*
- * 3. Array Union Types
- */
+// ─── 3. Array Union Types ───────────────────────────────────────────────────────
 
 // Array that can contain strings or numbers
 let mixedArray: (string | number)[] = [1, "hello", 2, "world", 3];
@@ -72,9 +94,7 @@ let multiDimensional: (string[] | number[])[] = [
 
 console.log("Multi-dimensional:", multiDimensional);
 
-/*
- * 4. Object Union Types
- */
+// ─── 4. Object Union Types & Discriminated Unions ──────────────────────
 
 // Union of different object structures
 type Circle = {
@@ -110,9 +130,7 @@ let rectangle: Rectangle = { kind: "rectangle", width: 4, height: 6 };
 console.log("Circle area:", calculateArea(circle));
 console.log("Rectangle area:", calculateArea(rectangle));
 
-/*
- * 5. Type Guards
- */
+// ─── 5. Type Guards ────────────────────────────────────────────────────────────
 
 // Using typeof type guard
 function processValue(value: string | number | boolean): void {
@@ -149,9 +167,7 @@ function processWithCustomGuards(input: string | number): void {
 processWithCustomGuards("typescript");
 processWithCustomGuards(3.14159);
 
-/*
- * 6. Union with Null and Undefined
- */
+// ─── 6. Union with null and undefined ────────────────────────────────────
 
 // Optional properties using union with undefined
 let optionalName: string | undefined = undefined;
@@ -180,9 +196,7 @@ function processNullable(value: string | null): string {
 console.log(processNullable(nullableValue));
 console.log(processNullable("Not null"));
 
-/*
- * 7. Union with Literal Types
- */
+// ─── 7. Union with Literal Types ─────────────────────────────────────────────
 
 // Theme configuration
 type Theme = "light" | "dark" | "auto";
@@ -212,9 +226,7 @@ function handleResponse(status: HttpStatus): string {
 console.log(handleResponse(200));
 console.log(handleResponse(404));
 
-/*
- * 8. Complex Union Scenarios
- */
+// ─── 8. Complex Union Scenarios ───────────────────────────────────────────────
 
 // API response type
 type ApiResponse<T> = 
@@ -243,9 +255,7 @@ let errorResponse: ApiResponse<string> = {
 handleApiResponse(successResponse);
 handleApiResponse(errorResponse);
 
-/*
- * 9. Union with Arrays and Objects
- */
+// ─── 9. Union with Arrays and Objects ───────────────────────────────────
 
 // Config that can be string or object
 type Config = string | {
@@ -266,9 +276,7 @@ function setupConnection(config: Config): void {
 setupConnection("localhost:3000");
 setupConnection({ host: "api.example.com", port: 443, secure: true });
 
-/*
- * 10. Narrowing with in operator
- */
+// ─── 10. Narrowing with `in` Operator ───────────────────────────────────
 
 type Fish = { swim: () => void; name: string };
 type Bird = { fly: () => void; name: string };
@@ -296,3 +304,24 @@ let bird: Bird = {
 
 move(fish);
 move(bird);
+
+/* ===================================================================
+ * CONCLUSION
+ * ===================================================================
+ * 1. Union types express that a value belongs to one of several types;
+ *    TypeScript enforces that you only use the common API until you narrow.
+ * 2. Discriminated unions (shared `kind`/`type` literal) are the go-to
+ *    pattern for variant data — they scale well as new cases are added.
+ * 3. The `switch` + `never` exhaustiveness trick turns missing cases into
+ *    compile-time errors rather than silent runtime bugs.
+ * 4. `typeof`, `instanceof`, `in`, and equality checks are all built-in
+ *    narrowing mechanisms TypeScript understands natively.
+ * 5. Custom type guard functions (`value is T`) let you encapsulate
+ *    complex narrowing logic and reuse it across your codebase.
+ * 6. String | null with strict null checks forces you to handle `null`
+ *    explicitly — use optional chaining (`?.`) and nullish coalescing
+ *    (`??`) to keep the code concise.
+ * 7. Literal union types (`"up" | "down" | "left" | "right"`) create
+ *    enum-like constraints without the extra syntax or runtime overhead.
+ * =================================================================== */
+export {};

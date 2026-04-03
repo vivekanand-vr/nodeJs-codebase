@@ -1,20 +1,46 @@
-/*
- * TypeScript Interfaces:
- * - Interfaces define the structure/contract that objects must follow
- * - Support for optional properties, readonly properties, and method signatures
- * - Interface inheritance and composition
- * - Can describe objects, functions, classes, and arrays
- * 
- * Key Features:
- * -> Duck typing and structural subtyping
- * -> Interface merging and declaration augmentation
- * -> Generic interfaces for reusability
- * -> Hybrid interfaces (callable + object properties)
- */
+/* ===================================================================
+ * CH 04 — TypeScript Interfaces
+ * ===================================================================
+ *
+ * WHAT IS AN INTERFACE?
+ *   An interface defines a structural contract: any object (or class)
+ *   that has the required properties and method signatures satisfies the
+ *   interface. TypeScript uses structural (duck) typing — the shape
+ *   matters, not the name of the type.
+ *
+ * INTERFACE CAPABILITIES
+ * ┌────────────────────────────┬────────────────────────────────────┐
+ * │ Feature                    │ Syntax                             │
+ * ├────────────────────────────┼────────────────────────────────────┤
+ * │ Optional property          │ name?: string                      │
+ * │ Readonly property          │ readonly id: number                │
+ * │ Method signature           │ greet(): string                    │
+ * │ Index signature            │ [key: string]: any                 │
+ * │ Callable signature         │ (input: string): boolean           │
+ * │ Single inheritance         │ interface B extends A              │
+ * │ Multiple inheritance       │ interface C extends A, B           │
+ * │ Declaration merging        │ declare same interface name twice  │
+ * │ Generic interface          │ interface Repo<T>                  │
+ * └────────────────────────────┴────────────────────────────────────┘
+ *
+ * KEY CONCEPTS
+ * -> Duck typing     : if an object has all required members → it satisfies
+ * -> Implements      : a class declares it fulfils an interface contract
+ * -> Merging         : two `interface Foo` declarations in same scope merge
+ * -> Generic         : interface parameterised by a type variable
+ *
+ * IMPORTANT NOTES
+ * 1. Interfaces are purely compile-time — they produce zero runtime code.
+ * 2. Classes can implement multiple interfaces: `implements A, B`.
+ * 3. Interface merging (declaration augmentation) is useful for extending
+ *    third-party library types without modifying source.
+ * 4. Unlike `type`, interfaces cannot use union (`|`) directly — use a
+ *    `type` alias if you need `A | B`.
+ * 5. Prefer `interface` over `type` for public API surface shapes since
+ *    interfaces support merging (important for library authors).
+ * =================================================================== */
 
-/*
- * 1. Basic Interface Definition
- */
+// ─── 1. Basic Interface Definition ───────────────────────────────────────────
 
 // Simple interface for object structure
 interface User {
@@ -41,9 +67,7 @@ function displayUser(user: User): void {
 
 displayUser(user1);
 
-/*
-* 2. Optional and Readonly Properties
-*/
+// ─── 2. Optional and Readonly Properties ──────────────────────────────────
 
 interface Product {
   readonly id: number;        // Readonly - cannot be changed after creation
@@ -76,9 +100,7 @@ product1.name = "Gaming Laptop"; // This is allowed
 console.log("Product 1:", product1);
 console.log("Product 2:", product2);
 
-/*
-* 3. Method Signatures in Interfaces
-*/
+// ─── 3. Method Signatures in Interfaces ─────────────────────────────────
 
 interface Calculator {
   result: number;
@@ -134,9 +156,7 @@ let calc = new BasicCalculator();
 let result = calc.add(10, 5).multiply(2, 3).getResult();
 console.log("Calculator result:", result);
 
-/*
-* 4. Function Interfaces
-*/
+// ─── 4. Function Interfaces (Callable Types) ────────────────────────────
 
 // Interface for function signature
 interface StringValidator {
@@ -185,9 +205,7 @@ console.log(myCounter(10));
 console.log("Interval:", myCounter.interval);
 myCounter.reset();
 
-/*
-* 5. Interface Inheritance
-*/
+// ─── 5. Interface Inheritance ─────────────────────────────────────────────────
 
 // Base interface
 interface Animal {
@@ -255,12 +273,10 @@ console.log("Service dog:", serviceDog.name, "Type:", serviceDog.serviceType);
 * 6. Generic Interfaces
 */
 
-/*
- * 6. Generic Interfaces
- *
- * - Generic interfaces allow you to define flexible structures that can work with various types.
- * - Common use cases include API responses, data repositories, services, etc.
- */
+// ─── 6. Generic Interfaces ────────────────────────────────────────────────────
+//
+// Generic interfaces allow flexible structures that work with various types.
+// Common use cases include API responses, data repositories, services, etc.
 
 // Generic interface for API responses
 interface ApiResponse<T> {
@@ -336,3 +352,24 @@ class UserRepository implements Repository<User, number> {
       return this.users.length < lengthBefore;
   }
 }
+
+/* ===================================================================
+ * CONCLUSION
+ * ===================================================================
+ * 1. Interfaces describe object SHAPES — any object that has the right
+ *    properties and methods satisfies the interface (structural typing).
+ * 2. Use `readonly` for properties that should never change after object
+ *    creation; use `?` for properties that may be absent.
+ * 3. Classes `implement` interfaces to formally commit to the contract;
+ *    the compiler verifies every required member is present.
+ * 4. Interface inheritance (`extends`) lets you build layered API
+ *    contracts — start narrow and extend as needed.
+ * 5. Declaration merging allows the same interface name to be declared
+ *    twice; the compiler merges them — ideal for augmenting library types.
+ * 6. Generic interfaces (`interface Repo<T>`) keep your data layer
+ *    type-safe without duplicating code for every entity.
+ * 7. Callable interfaces (`(x: T): R`) describe functions that also
+ *    carry properties — rare but useful for factory and counter patterns.
+ * =================================================================== */
+
+export {};

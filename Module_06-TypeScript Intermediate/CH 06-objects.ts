@@ -1,16 +1,49 @@
-/*
- * TypeScript Objects:
- * - Objects can be typed using interfaces, type aliases, or inline types
- * - Support for optional properties, readonly properties, and index signatures
- * - Object destructuring with type annotations
- * - Nested objects and complex object structures
- * 
- * Advanced Features:
- * -> Interface inheritance and composition
- * -> Mapped types and utility types
- * -> Generic objects and conditional types
- * -> Object validation and transformation
- */
+/* ===================================================================
+ * CH 06 — TypeScript Objects
+ * ===================================================================
+ *
+ * WHAT IS AN OBJECT IN TYPESCRIPT?
+ *   Objects are the primary data structure in TypeScript. TS lets you
+ *   describe their exact shape — including optional/readonly properties,
+ *   index signatures, generic parameters, and utility-type transforms.
+ *
+ * OBJECT TYPING STRATEGIES
+ * ┌──────────────────────────┬──────────────────────────────────────────┐
+ * │ Approach                 │ When to use                              │
+ * ├──────────────────────────┼──────────────────────────────────────────┤
+ * │ Inline type annotation   │ One-off, short shapes                    │
+ * │ type alias               │ Reusable; supports unions & intersections│
+ * │ interface                │ OOP contracts; declaration merging       │
+ * │ Generic object           │ API shapes that vary by data type        │
+ * │ Index signature          │ Dynamic keys (like a dictionary/map)     │
+ * └──────────────────────────┴──────────────────────────────────────────┘
+ *
+ * UTILITY TYPES CHEAT SHEET
+ * ┌─────────────────────┬────────────────────────────────────────────┐
+ * │ Utility type        │ What it does                               │
+ * ├─────────────────────┼────────────────────────────────────────────┤
+ * │ Partial<T>          │ All properties become optional             │
+ * │ Required<T>         │ All properties become required             │
+ * │ Readonly<T>         │ All properties become readonly             │
+ * │ Pick<T, K>          │ Keep only listed properties                │
+ * │ Omit<T, K>          │ Drop listed properties                     │
+ * │ Record<K, V>        │ Map type: each key of K has value type V   │
+ * └─────────────────────┴────────────────────────────────────────────┘
+ *
+ * KEY CONCEPTS
+ * -> Optional property  : `name?: string` — may be absent
+ * -> Readonly property  : `readonly id: number` — cannot reassign
+ * -> Index signature    : `[key: string]: V` — any dynamic string key
+ * -> Type guard fn      : `obj is T` — runtime check + static narrowing
+ *
+ * IMPORTANT NOTES
+ * 1. Excess property checking applies ONLY on fresh object literals —
+ *    passing via an intermediate variable bypasses it.
+ * 2. `Readonly<T>` is a shallow guard — nested objects are still mutable.
+ * 3. `Record<K, V>` is shorthand for `{ [key in K]: V }` — prefer it
+ *    over index signatures when the key set is known.
+ * 4. `Partial<T>` is the standard way to type update/patch payloads.
+ * =================================================================== */
 
 /*
  * 1. Basic Object Types
@@ -40,9 +73,7 @@ let person2: Person = {
 
 console.log("Person2:", person2);
 
-/*
-* 2. Optional Properties
-*/
+// ─── 2. Optional Properties ─────────────────────────────────────────────────────
 
 interface User {
   id: number;
@@ -78,9 +109,7 @@ let user2: User = {
 console.log("User1:", user1);
 console.log("User2:", user2);
 
-/*
-* 3. Readonly Properties
-*/
+// ─── 3. Readonly Properties ─────────────────────────────────────────────────────
 
 interface ReadonlyUser {
   readonly id: number;
@@ -110,9 +139,7 @@ let frozenUser: Readonly<User> = {
 
 // frozenUser.username = "newusername"; // Error: all properties are readonly
 
-/*
-* 4. Index Signatures
-*/
+// ─── 4. Index Signatures ────────────────────────────────────────────────────────
 
 // Object with dynamic property names
 interface StringDictionary {
@@ -142,9 +169,7 @@ let mixedObj: MixedObject = {
 
 console.log("Mixed object:", mixedObj);
 
-/*
-* 5. Nested Objects
-*/
+// ─── 5. Nested Objects ───────────────────────────────────────────────────────────
 
 interface Company {
   name: string;
@@ -190,9 +215,7 @@ let company: Company = {
 console.log("Company:", company);
 console.log("Engineering employees:", company.employees.departments.engineering);
 
-/*
-* 6. Object Methods
-*/
+// ─── 6. Object Methods (Fluent / Method Chaining) ────────────────────────
 
 interface Calculator {
   value: number;
@@ -239,9 +262,7 @@ let calculator: Calculator = {
   }
 };
 
-/*
-* 7. Object Destructuring with Types
-*/
+// ─── 7. Object Destructuring with Types ───────────────────────────────────
 
 // Basic destructuring
 // let { name, age }: { name: string; age: number } = { name: "Tom", age: 35 };
@@ -267,9 +288,7 @@ let {
 
 console.log("Username:", username, "Phone:", phone);
 
-/*
-* 8. Generic Objects
-*/
+// ─── 8. Generic Objects ─────────────────────────────────────────────────────────
 
 // Generic interface
 interface ApiResponse<T> {
@@ -314,9 +333,7 @@ function createResponse<T>(success: boolean, data?: T, error?: string): ApiRespo
 let stringResponse = createResponse(true, "Hello World");
 let numberResponse = createResponse(false, undefined, "Invalid number");
 
-/*
-* 9. Utility Types with Objects
-*/
+// ─── 9. Utility Types with Objects ─────────────────────────────────────────
 
 interface Product {
   id: number;
@@ -365,9 +382,7 @@ let productWithoutId: Omit<Product, "id"> = {
 console.log("Product summary:", productSummary);
 console.log("Product without ID:", productWithoutId);
 
-/*
-* 10. Object Validation and Type Guards
-*/
+// ─── 10. Object Validation and Type Guards ────────────────────────────────
 
 // Type guard function
 function isUser(obj: any): obj is User {
@@ -399,9 +414,7 @@ if (isUser(unknownObject)) {
   console.log("Valid user:", unknownObject.username); // TypeScript knows it's a User
 }
 
-/*
-* 11. Object Composition and Mixins
-*/
+// ─── 11. Object Composition and Mixins ───────────────────────────────────
 
 // Base interfaces
 interface Timestamped {
@@ -446,9 +459,7 @@ let productWithTimestamps = addTimestamps({
 
 console.log("Product with timestamps:", productWithTimestamps);
 
-/*
-* 12. Advanced Object Patterns
-*/
+// ─── 12. Advanced Object Patterns (Builder) ───────────────────────────────
 
 // Builder pattern for objects
 class UserBuilder {
@@ -490,3 +501,28 @@ let builtUser = new UserBuilder()
   .build();
 
 console.log("Built user:", builtUser);
+
+/* ===================================================================
+ * CONCLUSION
+ * ===================================================================
+ * 1. TypeScript's static object types let the compiler verify that every
+ *    required property is present and correctly typed at the call site.
+ * 2. Use `readonly` for properties that must not change after creation
+ *    (IDs, timestamps); use `?` for properties that may be absent.
+ * 3. Index signatures (`[key: string]: V`) model dictionaries — useful
+ *    for dynamic property names, but prevent excess property checking.
+ * 4. Utility types (`Partial`, `Required`, `Readonly`, `Pick`, `Omit`,
+ *    `Record`) transform existing types without duplication.
+ * 5. `Partial<T>` is the idiomatic type for update/patch payloads —
+ *    only the changed properties need to be supplied.
+ * 6. Generic objects (`ApiResponse<T>`) separate the container shape from
+ *    the contained data type, enabling reuse across the entire API layer.
+ * 7. Type guard functions (`obj is T`) move runtime validation into a
+ *    reusable, named function that also informs the type system.
+ * 8. The Builder pattern with `Partial<T>` as internal state provides
+ *    a fluent, type-safe alternative to large constructor signatures.
+ * 9. Object intersection types and mixin functions let you compose
+ *    cross-cutting concerns (timestamps, IDs, audit fields) cleanly.
+ * =================================================================== */
+
+export {};
